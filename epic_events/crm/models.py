@@ -6,10 +6,19 @@ from django.dispatch import receiver
 
 
 class UserRole(models.Model):
+    def __str__(self):
+        return f"{self.value}"
+        
     _possible_roles = [("management", "Management"), ("sales", "Sales"), ("support", "Support")]
 
     value = models.CharField(max_length=25, choices=_possible_roles, unique=True)
 
+def get_role_id_by_name(name:str):
+    id_num = 1
+    for role in UserRole._possible_roles:
+        if role[0] == name:
+            return id_num
+        id_num += 1
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password, role, **extra_fields):
@@ -37,56 +46,61 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-    # TODO: Implémenter les methodes de admin panel pour que staff = is_admin)
+    def __str__(self):
+        return f"{self.username}"
+        
     role = models.ForeignKey(to=UserRole, on_delete=models.RESTRICT)
     objects = UserManager()
 
-
 class Client(models.Model):
-    first_name = models.CharField(max_length=25)
-    last_name = models.CharField(max_length=25)
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+            
+    first_name = models.CharField(max_length=25, verbose_name="Prénom")
+    last_name = models.CharField(max_length=25, verbose_name="Nom")
     email = models.EmailField()
-    phone = models.CharField(max_length=10)
-    mobile = models.CharField(max_length=10)
-    company_name = models.CharField(max_length=25)
-    created_time = models.DateTimeField(auto_now_add=True)
-    updated_time = models.DateTimeField(auto_now=True)
-    sales_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True)
-
-
-class ContractStatus(models.Model):
-    _possible_status = [("ongoing", "Ongoing"), ("finished", "Finished")]
-    value = models.CharField(max_length=25, choices=_possible_status, unique=True)
+    phone = models.CharField(max_length=10, verbose_name="Téléphone")
+    mobile = models.CharField(max_length=10, verbose_name="Mobile")
+    company_name = models.CharField(max_length=25, verbose_name="Nom de l'entreprise")
+    created_time = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
+    updated_time = models.DateTimeField(auto_now=True, verbose_name="Modifié le")
+    sales_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, limit_choices_to = {'role': get_role_id_by_name(name="sales")}, verbose_name="Contact Vente")
 
 
 class Contract(models.Model):
+    def __str__(self):
+        return f"{self.client} -  {self.created_time.strftime('%d/%m/%Y - %H:%M:%S')}"
+        
     client = models.ForeignKey(to=Client, on_delete=models.CASCADE)
-    # TODO Utiliser limit_choices_to=... pour n'afficher que les sales
-    sales_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True)
-    created_time = models.DateTimeField(auto_now_add=True)
-    updated_time = models.DateTimeField(auto_now=True)
-    status = models.ForeignKey(to=ContractStatus, on_delete=models.RESTRICT)
-    amount = models.IntegerField()
-    payment_due = models.DateTimeField()
+    sales_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, limit_choices_to = {'role': get_role_id_by_name(name="sales")}, verbose_name="Contact Vente")
+    created_time = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
+    updated_time = models.DateTimeField(auto_now=True, verbose_name="Modifié le")
+    is_finished = models.BooleanField(default=False, verbose_name="Est terminé")
+    is_paid = models.BooleanField(default=False, verbose_name="Est payé")
+    amount = models.IntegerField(verbose_name="Montant")
+    payment_due_date = models.DateTimeField(verbose_name="Echéance du paiement")
 
 
 class Event(models.Model):
+    def __str__(self):
+        return f"{self.client} -  {self.created_time.strftime('%d/%m/%Y - %H:%M:%S')}"
+        
     client = models.ForeignKey(to=Client, on_delete=models.CASCADE)
-    support_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, related_name="support_contact")
-    sales_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, related_name="sales_contact")
-    created_time = models.DateTimeField(auto_now_add=True)
-    updated_time = models.DateTimeField(auto_now=True)
-    status = None
-    attendees = models.IntegerField()
+    contract = models.ForeignKey(to=Contract, on_delete=models.CASCADE, verbose_name="Contrat")
+    support_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, related_name="support_contact", limit_choices_to = {'role': get_role_id_by_name(name="support")}, verbose_name="Contact Support")
+    sales_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, related_name="sales_contact", limit_choices_to = {'role': get_role_id_by_name(name="sales")}, verbose_name="Contact Vente")
+    created_time = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
+    updated_time = models.DateTimeField(auto_now=True, verbose_name="Modifié le")
+    is_finished = models.BooleanField(default=False, verbose_name="Est terminé")
+    attendees = models.IntegerField(verbose_name="Participants")
     notes = models.TextField()
 
 
+
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+def handle_management_role(sender, instance, created, **kwargs):
     if created:
         management = Group.objects.get(name="management")
-
-        print(instance.role.value)
 
         if instance.role.value == "management":
             instance.is_staff = True
