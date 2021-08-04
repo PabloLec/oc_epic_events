@@ -9,6 +9,8 @@ class Command(BaseCommand):
             if not models.UserRole.objects.filter(value=value).exists():
                 print(" - Creating user role:", value)
                 models.UserRole.objects.create(value=value)
+            else:
+                print(" ! User role already existing:", value)
         print(" - User roles created")
 
     def create_management_group(self):
@@ -16,10 +18,11 @@ class Command(BaseCommand):
         permissions = ("add", "change", "view", "delete")
         group, created = Group.objects.get_or_create(name="management")
 
+        print(" - Creating management group permissions:")
         for model in accessible_models:
             for permission in permissions:
                 name = f"Can {permission} {model}"
-                print(f"Creating {name}")
+                print(f" - Creating permission: {name}")
 
                 try:
                     model_add_perm = Permission.objects.get(name=name)

@@ -8,17 +8,17 @@ from django.dispatch import receiver
 class UserRole(models.Model):
     def __str__(self):
         return f"{self.value}"
-        
+
     _possible_roles = [("management", "Management"), ("sales", "Sales"), ("support", "Support")]
 
     value = models.CharField(max_length=25, choices=_possible_roles, unique=True)
 
-def get_role_id_by_name(name:str):
-    id_num = 1
-    for role in UserRole._possible_roles:
+
+def get_role_id_by_name(name: str):
+    for id_num, role in enumerate(UserRole._possible_roles, start=1):
         if role[0] == name:
             return id_num
-        id_num += 1
+
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password, role, **extra_fields):
@@ -48,14 +48,15 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     def __str__(self):
         return f"{self.username}"
-        
+
     role = models.ForeignKey(to=UserRole, on_delete=models.RESTRICT)
     objects = UserManager()
+
 
 class Client(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
-            
+
     first_name = models.CharField(max_length=25, verbose_name="Prénom")
     last_name = models.CharField(max_length=25, verbose_name="Nom")
     email = models.EmailField()
@@ -64,15 +65,27 @@ class Client(models.Model):
     company_name = models.CharField(max_length=25, verbose_name="Nom de l'entreprise")
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
     updated_time = models.DateTimeField(auto_now=True, verbose_name="Modifié le")
-    sales_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, limit_choices_to = {'role': get_role_id_by_name(name="sales")}, verbose_name="Contact Vente")
+    sales_contact = models.ForeignKey(
+        to=User,
+        on_delete=models.SET_NULL,
+        null=True,
+        limit_choices_to={"role": get_role_id_by_name(name="sales")},
+        verbose_name="Contact Vente",
+    )
 
 
 class Contract(models.Model):
     def __str__(self):
         return f"{self.client} -  {self.created_time.strftime('%d/%m/%Y - %H:%M:%S')}"
-        
+
     client = models.ForeignKey(to=Client, on_delete=models.CASCADE)
-    sales_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, limit_choices_to = {'role': get_role_id_by_name(name="sales")}, verbose_name="Contact Vente")
+    sales_contact = models.ForeignKey(
+        to=User,
+        on_delete=models.SET_NULL,
+        null=True,
+        limit_choices_to={"role": get_role_id_by_name(name="sales")},
+        verbose_name="Contact Vente",
+    )
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
     updated_time = models.DateTimeField(auto_now=True, verbose_name="Modifié le")
     is_finished = models.BooleanField(default=False, verbose_name="Est terminé")
@@ -84,17 +97,30 @@ class Contract(models.Model):
 class Event(models.Model):
     def __str__(self):
         return f"{self.client} -  {self.created_time.strftime('%d/%m/%Y - %H:%M:%S')}"
-        
+
     client = models.ForeignKey(to=Client, on_delete=models.CASCADE)
     contract = models.ForeignKey(to=Contract, on_delete=models.CASCADE, verbose_name="Contrat")
-    support_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, related_name="support_contact", limit_choices_to = {'role': get_role_id_by_name(name="support")}, verbose_name="Contact Support")
-    sales_contact = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, related_name="sales_contact", limit_choices_to = {'role': get_role_id_by_name(name="sales")}, verbose_name="Contact Vente")
+    support_contact = models.ForeignKey(
+        to=User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="support_contact",
+        limit_choices_to={"role": get_role_id_by_name(name="support")},
+        verbose_name="Contact Support",
+    )
+    sales_contact = models.ForeignKey(
+        to=User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="sales_contact",
+        limit_choices_to={"role": get_role_id_by_name(name="sales")},
+        verbose_name="Contact Vente",
+    )
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
     updated_time = models.DateTimeField(auto_now=True, verbose_name="Modifié le")
     is_finished = models.BooleanField(default=False, verbose_name="Est terminé")
     attendees = models.IntegerField(verbose_name="Participants")
     notes = models.TextField()
-
 
 
 @receiver(post_save, sender=User)
