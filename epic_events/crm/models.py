@@ -88,10 +88,10 @@ class Contract(models.Model):
     )
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
     updated_time = models.DateTimeField(auto_now=True, verbose_name="Modifié le")
-    is_finished = models.BooleanField(default=False, verbose_name="Est terminé")
-    is_paid = models.BooleanField(default=False, verbose_name="Est payé")
     amount = models.IntegerField(verbose_name="Montant")
     payment_due_date = models.DateTimeField(verbose_name="Echéance du paiement")
+    is_finished = models.BooleanField(default=False, verbose_name="Est terminé")
+    is_paid = models.BooleanField(default=False, verbose_name="Est payé")
 
 
 class Event(models.Model):
