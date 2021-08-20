@@ -36,22 +36,36 @@ https://documenter.getpostman.com/view/16341824/TzzBrGTC
   python3 -m pip install -r requirements.txt
   ```
 
-- Finally, you can navigate to Django project directory and run the server:
-  ``` bash
-  cd epic_events
-  python3 -m manage runserver
-  ```
+- Make sure to have postgreSQL available on your system.
 
-- Website should be served at `127.0.0.1:8000`.
+- In `psql` CLI, type (if you edit below value, also edit `settings.py`):
+```sql
+CREATE DATABASE epic_events;
+CREATE USER epic_events WITH PASSWORD 'epic_events';
+ALTER ROLE epic_events SET client_encoding TO 'utf8';
+ALTER ROLE epic_events SET default_transaction_isolation TO 'read committed';
+ALTER ROLE epic_events SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE epic_events TO epic_events;
+\q
+```
+
+- Finally, setup DB with:
+``` bash
+  cd epic_events
+  python3 -m manage makemigrations
+  python3 -m manage migrate
+  python3 -m manage setup
+  ```
 
 # Usage
 
-- First, setup groups and permissions with:
-  ``` bash
-  python3 -m manage setup
-  ```
-- Then, create a superuser with:
+- First, create a superuser with:
   ``` bash
   python3 -m manage createsuperuser
   ```
+- Then, run the server:
+  ``` bash
+  python3 -m manage runserver
+  ```
+- Website should be served at `127.0.0.1:8000`.
 - You can manage your database on `127.0.0.1:8000/admin`  
