@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
 from .serializers import *
 from .models import *
 from .permissions import *
@@ -19,6 +20,15 @@ class ContractViewSet(viewsets.ModelViewSet):
 
 
 class EventViewSet(viewsets.ModelViewSet):
+    def list(self, request):
+        is_support = request.user.role.pk == get_role_id_by_name(name="support")
+        if is_support:
+            queryset = Event.objects.filter(support_contact=request.user)
+        else:
+            queryset = Event.objects.all()
+        serializer = EventSerializer(queryset, many=True)
+        return Response(serializer.data)
+
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     http_method_names = ["get", "post", "put", "delete"]
