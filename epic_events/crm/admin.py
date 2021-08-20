@@ -45,7 +45,7 @@ class UserAdmin(admin.ModelAdmin):
 
     form = UserForm
 
-    list_display = ("username", "email", "role", "is_staff")
+    list_display = ("id", "username", "email", "role", "is_staff")
     list_filter = ("role",)
 
     search_fields = ("username__startswith",)
@@ -54,6 +54,7 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
         "__str__",
         "sales_contact",
         "created_time",
@@ -64,6 +65,7 @@ class ClientAdmin(admin.ModelAdmin):
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
         "__str__",
         "sales_contact",
         "client",
@@ -78,6 +80,7 @@ class ContractAdmin(admin.ModelAdmin):
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
         "__str__",
         "sales_contact",
         "support_contact",

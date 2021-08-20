@@ -12,6 +12,7 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = (
+            "id",
             "first_name",
             "last_name",
             "email",
@@ -23,9 +24,12 @@ class ClientSerializer(serializers.ModelSerializer):
 
 
 class ContractSerializer(serializers.ModelSerializer):
+    payment_due_date = serializers.DateTimeField(format="%d/%m/%Y", input_formats=["%d/%m/%Y"])
+
     class Meta:
         model = Contract
         fields = (
+            "id",
             "client",
             "amount",
             "payment_due_date",
@@ -39,6 +43,7 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = (
+            "id",
             "client",
             "contract",
             "attendees",
