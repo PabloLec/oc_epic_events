@@ -10,7 +10,6 @@ class IsInManagementTeam(permissions.BasePermission):
 
 class IsInSalesTeam(permissions.BasePermission):
     def has_permission(self, request, view):
-        print(request.user.role.value == "sales")
         return request.user.role.value == "sales"
 
 

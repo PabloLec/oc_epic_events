@@ -5,3 +5,5 @@ lib
 tests/
 .envrc
 __pycache__
+nohup.out
+epic_events/crm/migrations/*.py

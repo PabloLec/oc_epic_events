@@ -108,14 +108,7 @@ class Event(models.Model):
         limit_choices_to={"role": get_role_id_by_name(name="support")},
         verbose_name="Contact Support",
     )
-    sales_contact = models.ForeignKey(
-        to=User,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="sales_contact",
-        limit_choices_to={"role": get_role_id_by_name(name="sales")},
-        verbose_name="Contact Vente",
-    )
+    event_date = models.DateTimeField(auto_now_add=True, verbose_name="Date")
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
     updated_time = models.DateTimeField(auto_now=True, verbose_name="Modifié le")
     is_finished = models.BooleanField(default=False, verbose_name="Est terminé")

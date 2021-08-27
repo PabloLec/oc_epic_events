@@ -82,7 +82,6 @@ class EventAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "__str__",
-        "sales_contact",
         "support_contact",
         "client",
         "contract",
@@ -90,6 +89,5 @@ class EventAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "client",
-        "sales_contact",
         "support_contact",
     )
