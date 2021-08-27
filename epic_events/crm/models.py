@@ -108,7 +108,7 @@ class Event(models.Model):
         limit_choices_to={"role": get_role_id_by_name(name="support")},
         verbose_name="Contact Support",
     )
-    event_date = models.DateTimeField(auto_now_add=True, verbose_name="Date")
+    event_date = models.DateTimeField(verbose_name="Date")
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
     updated_time = models.DateTimeField(auto_now=True, verbose_name="Modifié le")
     is_finished = models.BooleanField(default=False, verbose_name="Est terminé")
