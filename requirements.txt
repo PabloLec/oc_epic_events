@@ -1,4 +1,4 @@
-django==3.2.5
+django==3.2.24
 djangorestframework==3.12.4
 drf-nested-routers==0.93.3
 drf-jwt==1.19.1
